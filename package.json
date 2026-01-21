@@ -1,9 +1,10 @@
 {
-  "name": "skill-fish-cli",
+  "name": "skillfish",
   "version": "1.0.0",
   "description": "Install AI agent skills from GitHub with a single command",
   "type": "module",
   "bin": {
+    "skillfish": "./dist/index.js",
     "skill-fish": "./dist/index.js",
     "install-skill": "./dist/index.js"
   },
@@ -23,7 +24,7 @@
   "keywords": [
     "cli",
     "skills",
-    "skill-fish",
+    "skillfish",
     "claude",
     "claude-code",
     "cursor",
