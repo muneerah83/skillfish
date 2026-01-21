@@ -207,12 +207,19 @@ async function addSkills(
   const globalFlag = flags.includes('--global');
 
   // 1. Discover or select skills
-  const skillPaths = explicitPath
-    ? [explicitPath]
-    : await discoverSkillPaths(owner, repo);
+  let skillPaths: string[];
 
-  if (!skillPaths || skillPaths.length === 0) {
-    process.exit(1);
+  if (explicitPath) {
+    // Show the resolved skill name when using explicit path
+    const skillName = deriveSkillName(explicitPath, repo);
+    console.log(`Skill: ${pc.green('><>')} ${pc.bold(skillName)} ${pc.dim(explicitPath)}`);
+    skillPaths = [explicitPath];
+  } else {
+    const discovered = await discoverSkillPaths(owner, repo);
+    if (!discovered || discovered.length === 0) {
+      process.exit(1);
+    }
+    skillPaths = discovered;
   }
 
   // 2. Determine install location
