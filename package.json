@@ -1,9 +1,10 @@
 {
-  "name": "install-skill",
+  "name": "skill-fish-cli",
   "version": "1.0.0",
   "description": "Install AI agent skills from GitHub with a single command",
   "type": "module",
   "bin": {
+    "skill-fish": "./dist/index.js",
     "install-skill": "./dist/index.js"
   },
   "main": "./dist/index.js",
@@ -22,6 +23,7 @@
   "keywords": [
     "cli",
     "skills",
+    "skill-fish",
     "claude",
     "claude-code",
     "cursor",
@@ -38,12 +40,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/your-org/install-skill.git"
+    "url": "git+https://github.com/your-org/skill-fish-cli.git"
   },
   "bugs": {
-    "url": "https://github.com/your-org/install-skill/issues"
+    "url": "https://github.com/your-org/skill-fish-cli/issues"
   },
-  "homepage": "https://github.com/your-org/install-skill#readme",
+  "homepage": "https://github.com/your-org/skill-fish-cli#readme",
   "dependencies": {
     "@clack/prompts": "^0.11.0",
     "degit": "^2.8.4",
