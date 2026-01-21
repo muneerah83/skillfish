@@ -1,9 +1,9 @@
-# skillfish
+# install-skill
 
 Install AI agent skills from GitHub with a single command.
 
 ```bash
-npx skillfish owner/repo
+npx install-skill owner/repo
 ```
 
 ## Overview
@@ -20,16 +20,16 @@ One command installs skills to **all detected agents**:
 
 ```bash
 # Auto-discover skill location (interactive if multiple found)
-npx skillfish owner/repo
+npx install-skill owner/repo
 
-# Full path format (from skills.sh database)
-npx skillfish owner/repo/plugin/skill
+# Full path from GitHub
+npx install-skill owner/repo/plugin/skill
 
 # Specify explicit path
-npx skillfish owner/repo --path path/to/skill
+npx install-skill owner/repo --path path/to/skill
 
 # Overwrite existing skills
-npx skillfish owner/repo --force
+npx install-skill owner/repo --force
 ```
 
 ## Interactive Selection
@@ -51,16 +51,16 @@ Select skill (1-15):
 
 ```bash
 # Install from a skill repo with SKILL.md at root
-npx skillfish user/my-skill
+npx install-skill user/my-skill
 
-# Install using full path from skills.sh
-npx skillfish EveryInc/compound-engineering-plugin/compound-engineering/frontend-design
+# Install using full path from GitHub
+npx install-skill EveryInc/compound-engineering-plugin/compound-engineering/frontend-design
 
 # Install from a plugin repo with explicit path
-npx skillfish org/plugin-repo --path plugins/my-plugin/skills/skill-name
+npx install-skill org/plugin-repo --path plugins/my-plugin/skills/skill-name
 
 # Force reinstall
-npx skillfish user/skill --force
+npx install-skill user/skill --force
 ```
 
 ## Private Repos
@@ -68,7 +68,7 @@ npx skillfish user/skill --force
 Set `GITHUB_TOKEN` or `GH_TOKEN` environment variable:
 
 ```bash
-GITHUB_TOKEN=ghp_xxx npx skillfish private-org/private-repo
+GITHUB_TOKEN=ghp_xxx npx install-skill private-org/private-repo
 ```
 
 ## Discovery
@@ -80,13 +80,6 @@ The CLI searches these locations for `SKILL.md`:
 4. `plugins/{repo}/skills/{repo}/`
 
 Use `--path` to skip discovery and specify the exact location.
-
-## Aliases
-
-All commands work:
-- `npx skillfish` (primary)
-- `npx skill-fish`
-- `npx install-skill`
 
 ## License
 

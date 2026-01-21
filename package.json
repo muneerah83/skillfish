@@ -4,13 +4,11 @@
   "description": "Install AI agent skills from GitHub with a single command",
   "type": "module",
   "bin": {
-    "skillfish": "./dist/index.js",
-    "skill-fish": "./dist/index.js",
-    "install-skill": "./dist/index.js"
+    "skillfish": "./dist/index.js"
   },
-  "main": "./dist/index.js",
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "engines": {
     "node": ">=18"
@@ -19,34 +17,34 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "prepublishOnly": "npm run build",
-    "start": "node dist/index.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "cli",
     "skills",
-    "skillfish",
+    "agent-skills",
+    "ai-agent",
+    "ai-tools",
+    "mcp",
     "claude",
     "claude-code",
     "cursor",
     "windsurf",
-    "cline",
     "codex",
     "copilot",
-    "ai-agent",
-    "ai",
-    "llm",
-    "mcp"
+    "github-copilot",
+    "gemini-cli",
+    "opencode",
+    "goose",
+    "amp",
+    "roo",
+    "kiro",
+    "trae",
+    "cline"
   ],
-  "author": "",
+  "author": "Graeme Knox",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/knoxgraeme/skill-fish-cli.git"
-  },
-  "bugs": {
-    "url": "https://github.com/knoxgraeme/skill-fish-cli/issues"
-  },
-  "homepage": "https://github.com/knoxgraeme/skill-fish-cli#readme",
+  "homepage": "https://skill.fish",
   "dependencies": {
     "@clack/prompts": "^0.11.0",
     "degit": "^2.8.4",
