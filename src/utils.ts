@@ -177,3 +177,78 @@ export async function batchMap<T, R>(
   await Promise.all(workers);
   return results;
 }
+
+// === JSON Output Types ===
+
+/**
+ * Common installed skill structure used across commands.
+ */
+export interface InstalledSkill {
+  skill: string;
+  agent: string;
+  path: string;
+  location?: 'global' | 'project';
+}
+
+/**
+ * Base JSON output with fields common to all commands.
+ * All command-specific types extend this for API consistency.
+ */
+export interface BaseJsonOutput {
+  success: boolean;
+  exit_code?: number;
+  errors: string[];
+}
+
+/**
+ * JSON output for the `add` command.
+ */
+export interface AddJsonOutput extends BaseJsonOutput {
+  installed: InstalledSkill[];
+  skipped: Array<{ skill: string; agent: string; reason: string }>;
+  skills_found?: string[];
+}
+
+/**
+ * JSON output for the `list` command.
+ */
+export interface ListJsonOutput extends BaseJsonOutput {
+  installed: InstalledSkill[];
+  agents_detected: string[];
+}
+
+/**
+ * JSON output for the `remove` command.
+ */
+export interface RemoveJsonOutput extends BaseJsonOutput {
+  removed: InstalledSkill[];
+}
+
+/** @deprecated Use AddJsonOutput instead */
+export type JsonOutput = AddJsonOutput;
+
+/**
+ * Create a fresh JSON output object for the add command.
+ */
+export function createJsonOutput(): AddJsonOutput {
+  return {
+    success: true,
+    installed: [],
+    skipped: [],
+    errors: [],
+  };
+}
+
+/**
+ * Check if stdout is a TTY (interactive terminal).
+ */
+export function isTTY(): boolean {
+  return process.stdout.isTTY === true;
+}
+
+/**
+ * Check if stdin is a TTY (interactive terminal).
+ */
+export function isInputTTY(): boolean {
+  return process.stdin.isTTY === true;
+}
