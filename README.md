@@ -3,7 +3,7 @@
 Install AI agent skills from GitHub with a single command.
 
 ```bash
-npx skillfish owner/repo
+npx skillfish add owner/repo
 ```
 
 ## Overview
@@ -159,7 +159,7 @@ This CLI collects anonymous, aggregate install counts to understand skill popula
 To opt out, set `DO_NOT_TRACK=1` in your environment:
 
 ```bash
-DO_NOT_TRACK=1 npx skillfish owner/repo
+DO_NOT_TRACK=1 npx skillfish add owner/repo
 ```
 
 Telemetry is also automatically disabled in CI environments (`CI=true`).
