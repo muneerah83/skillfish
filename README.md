@@ -1,74 +1,95 @@
-# install-skill
+# skillfish
 
 Install AI agent skills from GitHub with a single command.
 
 ```bash
-npx install-skill owner/repo
+npx skillfish owner/repo
 ```
 
 ## Overview
 
 One command installs skills to **all detected agents**:
-- Claude Code (`~/.claude/skills/`)
-- Cursor (`~/.cursor/skills/`)
-- Windsurf (`~/.codeium/windsurf/skills/`)
-- Cline (`~/.cline/skills/`)
-- Codex (`~/.codex/skills/`)
-- Copilot (`~/.copilot/skills/`)
+
+| Agent | Skills Directory |
+|-------|------------------|
+| Claude Code | `~/.claude/skills/` |
+| Cursor | `~/.cursor/skills/` |
+| Windsurf | `~/.codeium/windsurf/skills/` |
+| Codex | `~/.codex/skills/` |
+| GitHub Copilot | `~/.github/skills/` |
+| Gemini CLI | `~/.gemini/skills/` |
+| OpenCode | `~/.opencode/skills/` |
+| Goose | `~/.goose/skills/` |
+| Amp | `~/.agents/skills/` |
+| Roo Code | `~/.roo/skills/` |
+| Kiro CLI | `~/.kiro/skills/` |
+| Kilo Code | `~/.kilocode/skills/` |
+| Trae | `~/.trae/skills/` |
+| Cline | `~/.cline/skills/` |
+| Antigravity | `~/.gemini/antigravity/skills/` |
+| Droid | `~/.factory/skills/` |
+| Clawdbot | `~/.clawdbot/skills/` |
 
 ## Usage
 
 ```bash
-# Auto-discover skill location (interactive if multiple found)
-npx install-skill owner/repo
+# Install a skill (auto-discovers SKILL.md location)
+npx skillfish add owner/repo
 
-# Full path from GitHub
-npx install-skill owner/repo/plugin/skill
+# Full path from GitHub (plugin/skill syntax)
+npx skillfish add owner/repo/plugin/skill
 
 # Specify explicit path
-npx install-skill owner/repo --path path/to/skill
+npx skillfish add owner/repo --path path/to/skill
+
+# Install all skills from a repo (non-interactive)
+npx skillfish add owner/repo --all
 
 # Overwrite existing skills
-npx install-skill owner/repo --force
+npx skillfish add owner/repo --force
+
+# Skip confirmation prompt
+npx skillfish add owner/repo --yes
+
+# List installed skills
+npx skillfish list --global
 ```
 
 ## Interactive Selection
 
-When a repo contains multiple skills, you'll get an interactive menu:
+When a repo contains multiple skills, you'll get an interactive multi-select menu with skill names and descriptions from frontmatter:
 
 ```
-Found 15 skills in this repository:
-
-  1) coding-tutor
-  2) agent-browser
-  3) agent-native-architecture
-  ...
-
-Select skill (1-15):
+◆  Select skills to install
+│  ◻ Frontend Design - Create distinctive, production-grade frontend interfaces
+│  ◻ Agent Browser - Browser automation using Vercel's agent-browser CLI
+│  ◻ Git Worktree - Manage Git worktrees for isolated parallel development
+│  ...
+└
 ```
+
+Use `--all` to install all skills non-interactively (useful for automation).
 
 ## Examples
 
 ```bash
 # Install from a skill repo with SKILL.md at root
-npx install-skill user/my-skill
+npx skillfish add user/my-skill
 
 # Install using full path from GitHub
-npx install-skill EveryInc/compound-engineering-plugin/compound-engineering/frontend-design
+npx skillfish add EveryInc/compound-engineering-plugin/compound-engineering/frontend-design
 
 # Install from a plugin repo with explicit path
-npx install-skill org/plugin-repo --path plugins/my-plugin/skills/skill-name
+npx skillfish add org/plugin-repo --path plugins/my-plugin/skills/skill-name
+
+# Install all skills non-interactively
+npx skillfish add org/plugin-repo --all --yes
 
 # Force reinstall
-npx install-skill user/skill --force
-```
+npx skillfish add user/skill --force
 
-## Private Repos
-
-Set `GITHUB_TOKEN` or `GH_TOKEN` environment variable:
-
-```bash
-GITHUB_TOKEN=ghp_xxx npx install-skill private-org/private-repo
+# JSON output for automation
+npx skillfish add owner/repo --json
 ```
 
 ## Discovery
@@ -80,6 +101,32 @@ The CLI searches these locations for `SKILL.md`:
 4. `plugins/{repo}/skills/{repo}/`
 
 Use `--path` to skip discovery and specify the exact location.
+
+## Telemetry
+
+This CLI collects anonymous, aggregate install counts to understand skill popularity. No personally identifiable information is collected.
+
+**What is collected:**
+- Skill identifier (e.g., `owner/repo/skill-name`)
+- Incremented install count
+
+**What is NOT collected:**
+- IP addresses
+- User identifiers
+- System information
+- Usage patterns
+
+To opt out, set `DO_NOT_TRACK=1` in your environment:
+
+```bash
+DO_NOT_TRACK=1 npx skillfish owner/repo
+```
+
+Telemetry is also automatically disabled in CI environments (`CI=true`).
+
+## Contributing
+
+Contributions welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
 
