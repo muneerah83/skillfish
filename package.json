@@ -16,10 +16,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nichochar/skillfish.git"
+    "url": "git+https://github.com/knoxgraeme/skillfish.git"
   },
   "bugs": {
-    "url": "https://github.com/nichochar/skillfish/issues"
+    "url": "https://github.com/knoxgraeme/skillfish/issues"
   },
   "scripts": {
     "build": "tsc",
