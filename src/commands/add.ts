@@ -133,33 +133,36 @@ Examples:
       }
     }
 
-    // Parse repo format - supports both owner/repo and owner/repo/plugin/skill
+    // Parse repo format - supports owner/repo and owner/repo/path/to/skill
     const parts = repoArg.split('/');
     let owner: string;
     let repo: string;
 
-    if (parts.length === 2) {
-      [owner, repo] = parts;
-    } else if (parts.length === 4) {
-      const [o, r, plugin, skill] = parts;
-      owner = o;
-      repo = r;
-      // Security: validate plugin and skill names
-      if (!isValidName(plugin) || !isValidName(skill)) {
-        exitWithError(
-          'Invalid plugin or skill name. Use only alphanumeric characters, dots, hyphens, and underscores.',
-          EXIT_CODES.INVALID_ARGS
-        );
-      }
-      explicitPath = explicitPath || `plugins/${plugin}/skills/${skill}`;
-      if (!jsonMode) {
-        console.log(`Installing skill from: ${plugin}/${skill}`);
-      }
-    } else {
+    if (parts.length < 2) {
       exitWithError(
-        'Invalid format. Use: owner/repo or owner/repo/plugin/skill',
+        'Invalid format. Use: owner/repo or owner/repo/path/to/skill',
         EXIT_CODES.INVALID_ARGS
       );
+    }
+
+    [owner, repo] = parts;
+
+    // If path components exist after owner/repo, use them as the skill path
+    if (parts.length > 2) {
+      const pathParts = parts.slice(2);
+      // Security: validate each path component
+      for (const part of pathParts) {
+        if (!isValidName(part)) {
+          exitWithError(
+            'Invalid path component. Use only alphanumeric characters, dots, hyphens, and underscores.',
+            EXIT_CODES.INVALID_ARGS
+          );
+        }
+      }
+      explicitPath = explicitPath || pathParts.join('/');
+      if (!jsonMode) {
+        console.log(`Installing skill from: ${explicitPath}`);
+      }
     }
 
     // Validate owner/repo (security: prevent injection)
@@ -295,11 +298,10 @@ Examples:
       totalSkipped += result.skipped.length;
 
       // Track successful installs (telemetry with timeout)
+      console.log(`[debug] installed: ${result.installed.length}, skipped: ${result.skipped.length}`);
       if (result.installed.length > 0) {
-        // Construct github value to match skills.github column format: owner/repo/path/to/skill
-        const skillDir = skillPath.replace(/\/?SKILL\.md$/i, '').replace(/^\.?\/?/, '');
-        const github = skillDir ? `${owner}/${repo}/${skillDir}` : `${owner}/${repo}`;
-        telemetryPromises.push(trackInstall(github));
+        console.log(`[debug] Tracking: owner=${owner}, repo=${repo}, skillName=${skillName}`);
+        telemetryPromises.push(trackInstall(owner, repo, skillName));
       }
     }
 

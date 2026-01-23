@@ -4,7 +4,7 @@
   "description": "Install AI agent skills from GitHub with a single command",
   "type": "module",
   "bin": {
-    "skillfish": "./dist/index.js"
+    "skillfish": "dist/index.js"
   },
   "files": [
     "dist",

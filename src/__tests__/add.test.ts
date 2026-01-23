@@ -27,10 +27,12 @@ describe('add command', () => {
     expect(stderr).toContain('Invalid format');
   });
 
-  it('exits with error for invalid repo format (three parts)', () => {
+  it('accepts three-part format as owner/repo/path', () => {
+    // Three parts is now valid: owner/repo/path
+    // This will fail at network level, not parsing
     const { exitCode, stderr } = invokeCli(['add', 'owner/repo/extra']);
-    expect(exitCode).toBe(2);
-    expect(stderr).toContain('Invalid format');
+    // Should not fail with "Invalid format" - it should proceed to network request
+    expect(stderr).not.toContain('Invalid format');
   });
 
   it('rejects invalid characters in owner/repo', () => {
@@ -39,10 +41,10 @@ describe('add command', () => {
     expect(stderr).toContain('Invalid repository format');
   });
 
-  it('rejects invalid characters in plugin/skill path', () => {
+  it('rejects invalid characters in path components', () => {
     const { exitCode, stderr } = invokeCli(['add', 'owner/repo/plugin;evil/skill']);
     expect(exitCode).toBe(2);
-    expect(stderr).toContain('Invalid plugin or skill name');
+    expect(stderr).toContain('Invalid path component');
   });
 
   it('outputs valid JSON with --json flag on error', () => {
@@ -51,7 +53,7 @@ describe('add command', () => {
     expect(() => JSON.parse(stdout)).not.toThrow();
     const json = JSON.parse(stdout);
     expect(json.success).toBe(false);
-    expect(json.errors).toContain('Invalid format. Use: owner/repo or owner/repo/plugin/skill');
+    expect(json.errors).toContain('Invalid format. Use: owner/repo or owner/repo/path/to/skill');
   });
 
   it('validates --path argument rejects directory traversal', () => {

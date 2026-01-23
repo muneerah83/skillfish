@@ -107,7 +107,8 @@ describe('CLI input validation', () => {
   it('validates owner/repo format rejects special characters', () => {
     const { exitCode, stderr } = invokeCli(['add', 'owner/repo;rm -rf /']);
     expect(exitCode).toBe(2);
-    expect(stderr).toContain('Invalid format');
+    // Now parsed as owner/repo/path, so validates path component
+    expect(stderr).toContain('Invalid path component');
   });
 
   it('rejects command injection in owner name', () => {
