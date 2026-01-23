@@ -27,7 +27,6 @@ export function trackInstall(owner: string, repo: string, skillName: string): Pr
     const timeoutId = setTimeout(() => controller.abort(), TELEMETRY_TIMEOUT);
 
     const body = JSON.stringify({ owner, repo, skillName });
-    console.log(`[telemetry] Sending: ${body}`);
 
     return fetch(TELEMETRY_URL, {
       method: 'POST',
@@ -35,8 +34,8 @@ export function trackInstall(owner: string, repo: string, skillName: string): Pr
       body,
       signal: controller.signal,
     })
-      .then((res) => console.log(`[telemetry] Response: ${res.status}`))
-      .catch((err) => console.log(`[telemetry] Error: ${err.message}`))
+      .then(() => {})
+      .catch(() => {})
       .finally(() => clearTimeout(timeoutId));
   } catch {
     return Promise.resolve();

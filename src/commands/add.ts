@@ -56,6 +56,7 @@ type SkillMetadata = {
 export const addCommand = new Command('add')
   .description('Install a skill from a GitHub repository')
   .argument('<repo>', 'GitHub repository (owner/repo or owner/repo/plugin/skill)')
+  .argument('[skill-name]', 'Install a specific skill by name (from SKILL.md frontmatter)')
   .option('--force', 'Overwrite existing skills without prompting')
   .option('-y, --yes', 'Skip all confirmation prompts')
   .option('--all', 'Install all skills found in the repository')
@@ -66,11 +67,12 @@ export const addCommand = new Command('add')
   .addHelpText('after', `
 Examples:
   $ skillfish add owner/repo                  Install from a repository
+  $ skillfish add owner/repo my-skill         Install skill by name
   $ skillfish add owner/repo --all            Install all skills in repo
-  $ skillfish add owner/repo/plugin/skill     Install a specific skill
+  $ skillfish add owner/repo/plugin/skill     Install a specific skill by path
   $ skillfish add owner/repo --path path/to   Install skill at specific path
   $ skillfish add owner/repo --project        Install to current project only`)
-  .action(async (repoArg: string, options: AddCommandOptions, command: Command) => {
+  .action(async (repoArg: string, skillNameArg: string | undefined, options: AddCommandOptions, command: Command) => {
     const jsonMode = command.parent?.opts().json ?? false;
     const jsonOutput = createJsonOutput();
     const version = command.parent?.opts().version ?? '0.0.0';
@@ -173,7 +175,7 @@ Examples:
     // 1. Discover or select skills
     const skillPaths = explicitPath
       ? [explicitPath]
-      : await discoverSkillPaths(owner, repo, installAll, jsonMode, jsonOutput);
+      : await discoverSkillPaths(owner, repo, installAll, jsonMode, jsonOutput, skillNameArg);
 
     if (!skillPaths || skillPaths.length === 0) {
       if (jsonMode) {
@@ -298,9 +300,7 @@ Examples:
       totalSkipped += result.skipped.length;
 
       // Track successful installs (telemetry with timeout)
-      console.log(`[debug] installed: ${result.installed.length}, skipped: ${result.skipped.length}`);
       if (result.installed.length > 0) {
-        console.log(`[debug] Tracking: owner=${owner}, repo=${repo}, skillName=${skillName}`);
         telemetryPromises.push(trackInstall(owner, repo, skillName));
       }
     }
@@ -435,7 +435,8 @@ async function discoverSkillPaths(
   repo: string,
   installAll: boolean,
   jsonMode: boolean,
-  jsonOutput: AddJsonOutput
+  jsonOutput: AddJsonOutput,
+  targetSkillName?: string
 ): Promise<string[] | null> {
   let skillPaths: string[];
 
@@ -516,6 +517,39 @@ async function discoverSkillPaths(
   // Store found skills in JSON output
   jsonOutput.skills_found = skills.map((s) => s.name);
 
+  // If a specific skill name was requested, find and return it
+  if (targetSkillName) {
+    const normalizedTarget = targetSkillName.toLowerCase();
+    const matchedSkill = skills.find(
+      (s) => s.name.toLowerCase() === normalizedTarget
+    );
+
+    if (matchedSkill) {
+      const displayName = toTitleCase(matchedSkill.name);
+      const desc = matchedSkill.description ? truncate(matchedSkill.description, 60) : '';
+      if (!jsonMode) {
+        p.log.info(`${pc.bold(displayName)}${desc ? pc.dim(` - ${desc}`) : ''}`);
+      }
+      return [matchedSkill.dir];
+    }
+
+    // Skill not found - show available skills
+    const errorMsg = `Skill "${targetSkillName}" not found in repository`;
+    if (jsonMode) {
+      jsonOutput.errors.push(errorMsg);
+      jsonOutput.success = false;
+    } else {
+      p.log.error(errorMsg);
+      console.log(`\nAvailable skills in ${owner}/${repo}:`);
+      for (const skill of skills) {
+        const displayName = toTitleCase(skill.name);
+        const desc = skill.description ? pc.dim(` - ${truncate(skill.description, 80)}`) : '';
+        console.log(`  - ${pc.cyan(skill.name)} ${displayName}${desc}`);
+      }
+    }
+    return null;
+  }
+
   if (skills.length === 1) {
     const skill = skills[0];
     const displayName = toTitleCase(skill.name);
@@ -546,16 +580,16 @@ async function discoverSkillPaths(
 
     // Otherwise, list skills and exit with guidance
     if (jsonMode) {
-      jsonOutput.errors.push('Multiple skills found. Use --path or --all to specify which one(s).');
+      jsonOutput.errors.push('Multiple skills found. Specify skill name, use --path, or --all.');
       jsonOutput.success = false;
     } else {
       console.log(`\nFound ${skills.length} skills in this repository:`);
       for (const skill of skills) {
         const displayName = toTitleCase(skill.name);
         const desc = skill.description ? pc.dim(` - ${truncate(skill.description, 80)}`) : '';
-        console.log(`  - ${displayName}${desc}`);
+        console.log(`  - ${pc.cyan(skill.name)} ${displayName}${desc}`);
       }
-      console.error('\nMultiple skills found. Use --path or --all to specify which one(s) (non-interactive mode).');
+      console.error('\nMultiple skills found. Specify skill name, use --path, or --all (non-interactive mode).');
     }
     return null;
   }
