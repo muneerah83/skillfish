@@ -14,7 +14,7 @@ import {
 import { homedir } from 'os';
 import { join } from 'path';
 import { randomUUID } from 'crypto';
-import degit from 'degit';
+import { downloadTemplate } from 'giget';
 import type { Agent } from './agents.js';
 import { SKILL_FILENAME } from './github.js';
 
@@ -31,6 +31,20 @@ export interface InstallResult {
 export interface InstallOptions {
   force: boolean;
   baseDir: string;
+  /** Branch to clone from. If not specified, giget will use the repository's default branch. */
+  branch?: string;
+}
+
+/**
+ * Validates a branch name for safe use in giget source strings.
+ * Git branch names can contain alphanumerics, dots, hyphens, underscores, and slashes.
+ * We explicitly reject '#' which is used as a delimiter in giget syntax.
+ */
+function isValidBranchName(branch: string): boolean {
+  if (!branch || branch.length > 255) return false;
+  // Allow alphanumerics, dots, hyphens, underscores, and slashes (for feature branches)
+  // Reject anything else, especially '#' which would break giget parsing
+  return /^[\w./-]+$/.test(branch) && !branch.includes('#');
 }
 
 export interface CopyResult {
@@ -130,18 +144,32 @@ export async function installSkill(
     failed: false,
   };
 
-  const { force, baseDir } = options;
+  const { force, baseDir, branch } = options;
 
   const tmpDir = join(homedir(), '.cache', 'skillfish', `${owner}-${repo}-${randomUUID()}`);
   mkdirSync(tmpDir, { recursive: true, mode: 0o700 });
 
   try {
-    // Download skill
+    // Download skill using giget (tarball-based, works reliably on all repo sizes)
+    // Build giget source: github:owner/repo[/subpath][#branch]
     const downloadPath = skillPath === SKILL_FILENAME ? '' : skillPath;
-    const degitPath = downloadPath ? `${owner}/${repo}/${downloadPath}` : `${owner}/${repo}`;
+    let source = downloadPath
+      ? `github:${owner}/${repo}/${downloadPath}`
+      : `github:${owner}/${repo}`;
 
-    const emitter = degit(degitPath, { cache: false, force: true });
-    await emitter.clone(tmpDir);
+    // Append branch if specified (critical for repos with non-standard default branches like 'canary')
+    // Validate branch name to prevent injection attacks via malformed branch names
+    if (branch) {
+      if (!isValidBranchName(branch)) {
+        throw new Error(`Invalid branch name: ${branch}`);
+      }
+      source = `${source}#${branch}`;
+    }
+
+    await downloadTemplate(source, {
+      dir: tmpDir,
+      forceClean: true,
+    });
 
     // Validate download
     const skillMdPath = join(tmpDir, SKILL_FILENAME);
@@ -183,7 +211,13 @@ export async function installSkill(
     if (err instanceof SkillMdNotFoundError) {
       result.failureReason = err.message;
     } else {
-      result.failureReason = err instanceof Error ? err.message : String(err);
+      const errMsg = err instanceof Error ? err.message : String(err);
+      // Provide more helpful error messages for common failures
+      if (errMsg.includes('404') || errMsg.includes('Not Found')) {
+        result.failureReason = `Repository or path not found: ${owner}/${repo}${skillPath !== SKILL_FILENAME ? `/${skillPath}` : ''}`;
+      } else {
+        result.failureReason = errMsg;
+      }
     }
   } finally {
     rmSync(tmpDir, { recursive: true, force: true });

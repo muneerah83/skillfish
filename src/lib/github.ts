@@ -8,8 +8,17 @@ import { isGitTreeResponse, extractSkillPaths, sleep } from '../utils.js';
 const API_TIMEOUT_MS = 10000;
 const MAX_RETRIES = 3;
 const RETRY_DELAYS_MS = [1000, 2000, 4000]; // Exponential backoff
-const DEFAULT_BRANCHES = ['main', 'master'] as const;
 export const SKILL_FILENAME = 'SKILL.md';
+
+// === Types ===
+
+/**
+ * Result of skill discovery including branch information.
+ */
+export interface SkillDiscoveryResult {
+  paths: string[];
+  branch: string;
+}
 
 // === Error Types ===
 
@@ -58,7 +67,91 @@ export class GitHubApiError extends Error {
   }
 }
 
+// === Helper Functions ===
+
+/**
+ * Check if a response indicates rate limiting and throw RateLimitError if so.
+ * @throws {RateLimitError} When rate limit is exceeded
+ */
+function checkRateLimit(res: Response): void {
+  if (res.status === 403) {
+    const remaining = res.headers.get('X-RateLimit-Remaining');
+    if (remaining === '0') {
+      const resetHeader = res.headers.get('X-RateLimit-Reset');
+      const resetTime = resetHeader ? new Date(parseInt(resetHeader) * 1000) : undefined;
+      throw new RateLimitError(resetTime);
+    }
+  }
+}
+
+/**
+ * Wrap unknown errors in appropriate typed errors.
+ * Re-throws known error types, wraps others in NetworkError.
+ * @throws {RateLimitError | RepoNotFoundError | GitHubApiError | NetworkError}
+ */
+function wrapApiError(err: unknown): never {
+  // Re-throw known error types
+  if (
+    err instanceof RateLimitError ||
+    err instanceof RepoNotFoundError ||
+    err instanceof GitHubApiError
+  ) {
+    throw err;
+  }
+
+  // Handle timeout errors
+  if (err instanceof Error && err.name === 'AbortError') {
+    throw new NetworkError('Request timed out. Check your network connection.');
+  }
+
+  // Wrap unknown errors as NetworkError
+  throw new NetworkError(
+    `Network error: ${err instanceof Error ? err.message : 'unknown error'}`
+  );
+}
+
 // === Functions ===
+
+/**
+ * Fetch the default branch name for a repository.
+ * Uses the GitHub repos API which returns repository metadata including default_branch.
+ *
+ * @throws {RepoNotFoundError} When the repository is not found
+ * @throws {RateLimitError} When GitHub API rate limit is exceeded
+ * @throws {NetworkError} On network errors
+ */
+export async function fetchDefaultBranch(owner: string, repo: string): Promise<string> {
+  const headers: Record<string, string> = { 'User-Agent': 'skillfish' };
+  const url = `https://api.github.com/repos/${owner}/${repo}`;
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+
+  try {
+    const res = await fetchWithRetry(url, { headers, signal: controller.signal });
+
+    checkRateLimit(res);
+
+    if (res.status === 404) {
+      throw new RepoNotFoundError(owner, repo);
+    }
+
+    if (!res.ok) {
+      throw new GitHubApiError(`GitHub API returned status ${res.status}`);
+    }
+
+    const data = await res.json() as { default_branch?: string };
+    if (typeof data.default_branch !== 'string' || !data.default_branch) {
+      throw new GitHubApiError('Repository metadata missing or invalid default_branch field');
+    }
+
+    return data.default_branch;
+  } catch (err: unknown) {
+    wrapApiError(err);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
 
 /**
  * Fetch with retry and exponential backoff.
@@ -107,120 +200,64 @@ export async function fetchWithRetry(
 /**
  * Fetch raw SKILL.md content from GitHub.
  * Uses raw.githubusercontent.com which is not rate-limited like the API.
- * Tries both main and master branches in parallel for better performance.
  */
 export async function fetchSkillMdContent(
   owner: string,
   repo: string,
-  path: string
+  path: string,
+  branch: string
 ): Promise<string | null> {
   const headers = { 'User-Agent': 'skillfish' };
+  const url = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
 
-  // Try both branches in parallel
-  const results = await Promise.allSettled(
-    DEFAULT_BRANCHES.map(async (branch) => {
-      const url = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
-      const res = await fetchWithRetry(url, { headers }, 2);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.text();
-    })
-  );
-
-  // Return first successful result
-  for (const result of results) {
-    if (result.status === 'fulfilled') {
-      return result.value;
-    }
+  try {
+    const res = await fetchWithRetry(url, { headers }, 2);
+    if (!res.ok) return null;
+    return res.text();
+  } catch {
+    return null;
   }
-
-  return null;
 }
 
 /**
  * Find all SKILL.md files in a GitHub repository.
- * Uses sequential branch checking to conserve API rate limit (60/hr unauthenticated).
+ * Fetches the default branch, then searches for skills on that branch.
  *
+ * @returns SkillDiscoveryResult with paths and the branch they were found on
  * @throws {RateLimitError} When GitHub API rate limit is exceeded
  * @throws {RepoNotFoundError} When the repository is not found
  * @throws {NetworkError} On network errors (timeout, connection refused)
  * @throws {GitHubApiError} When the API response format is unexpected
  */
-export async function findAllSkillMdFiles(owner: string, repo: string): Promise<string[]> {
+export async function findAllSkillMdFiles(owner: string, repo: string): Promise<SkillDiscoveryResult> {
   const headers: Record<string, string> = { 'User-Agent': 'skillfish' };
+
+  // Get the default branch
+  const branch = await fetchDefaultBranch(owner, repo);
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
 
   try {
-    // Try each branch sequentially to conserve rate limit
-    for (const branch of DEFAULT_BRANCHES) {
-      const url = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
+    const url = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
+    const res = await fetchWithRetry(url, { headers, signal: controller.signal });
 
-      try {
-        const res = await fetchWithRetry(url, { headers, signal: controller.signal });
+    checkRateLimit(res);
 
-        // Check for rate limiting
-        if (res.status === 403) {
-          const remaining = res.headers.get('X-RateLimit-Remaining');
-          if (remaining === '0') {
-            const resetHeader = res.headers.get('X-RateLimit-Reset');
-            const resetTime = resetHeader ? new Date(parseInt(resetHeader) * 1000) : undefined;
-            throw new RateLimitError(resetTime);
-          }
-        }
-
-        // 404 means branch doesn't exist, try next
-        if (res.status === 404) {
-          continue;
-        }
-
-        if (!res.ok) {
-          continue;
-        }
-
-        const rawData: unknown = await res.json();
-
-        if (!isGitTreeResponse(rawData)) {
-          throw new GitHubApiError('Unexpected response format from GitHub API.');
-        }
-
-        return extractSkillPaths(rawData, SKILL_FILENAME);
-      } catch (err) {
-        // Re-throw typed errors
-        if (
-          err instanceof RateLimitError ||
-          err instanceof GitHubApiError
-        ) {
-          throw err;
-        }
-        // If this is the last branch, let the error propagate
-        if (branch === DEFAULT_BRANCHES[DEFAULT_BRANCHES.length - 1]) {
-          throw err;
-        }
-        // Otherwise try next branch
-        continue;
-      }
+    if (!res.ok) {
+      throw new GitHubApiError(`GitHub API returned status ${res.status}`);
     }
 
-    // No branch found
-    throw new RepoNotFoundError(owner, repo);
+    const rawData: unknown = await res.json();
+
+    if (!isGitTreeResponse(rawData)) {
+      throw new GitHubApiError('Unexpected response format from GitHub API.');
+    }
+
+    const paths = extractSkillPaths(rawData, SKILL_FILENAME);
+    return { paths, branch };
   } catch (err: unknown) {
-    // Re-throw typed errors
-    if (
-      err instanceof RateLimitError ||
-      err instanceof RepoNotFoundError ||
-      err instanceof GitHubApiError
-    ) {
-      throw err;
-    }
-
-    if (err instanceof Error && err.name === 'AbortError') {
-      throw new NetworkError('Request timed out. Check your network connection.');
-    }
-
-    throw new NetworkError(
-      `Network error: ${err instanceof Error ? err.message : 'unknown error'}`
-    );
+    wrapApiError(err);
   } finally {
     clearTimeout(timeoutId);
   }
