@@ -1,5 +1,11 @@
 # skillfish
 
+[![npm](https://img.shields.io/npm/v/skillfish)](https://npmjs.com/package/skillfish)
+[![downloads](https://img.shields.io/npm/dm/skillfish)](https://npmjs.com/package/skillfish)
+[![license](https://img.shields.io/npm/l/skillfish)](LICENSE)
+[![node](https://img.shields.io/node/v/skillfish)](package.json)
+[![CI](https://github.com/knoxgraeme/skillfish/actions/workflows/ci.yml/badge.svg)](https://github.com/knoxgraeme/skillfish/actions)
+
 Install AI agent skills from GitHub with a single command.
 
 ```bash
@@ -101,9 +107,9 @@ When a repo contains multiple skills, you'll get an interactive multi-select men
 
 ```
 ◆  Select skills to install
-│  ◻ Frontend Design - Create distinctive, production-grade frontend interfaces
-│  ◻ Agent Browser - Browser automation using Vercel's agent-browser CLI
-│  ◻ Git Worktree - Manage Git worktrees for isolated parallel development
+│  ◻ my-skill - A helpful skill for your AI agent
+│  ◻ another-skill - Another useful capability
+│  ◻ third-skill - Yet another skill option
 │  ...
 └
 ```
@@ -117,7 +123,7 @@ Use `--all` to install all skills non-interactively (useful for automation).
 npx skillfish add user/my-skill
 
 # Install using full path from GitHub
-npx skillfish add EveryInc/compound-engineering-plugin/compound-engineering/frontend-design
+npx skillfish add owner/repo/path/to/skill
 
 # Install from a plugin repo with explicit path
 npx skillfish add org/plugin-repo --path plugins/my-plugin/skills/skill-name
@@ -183,10 +189,22 @@ skillfish add owner/repo --json
 # Output includes: "exit_code": 0 (or error code)
 ```
 
+## Security
+
+**Security Note:** Skills are markdown files that provide instructions to AI agents. Always review skills before installing. skillfish does not vet third-party skills.
+
+To report security vulnerabilities, please email security@skill.fish. See [SECURITY.md](SECURITY.md) for details.
+
 ## Contributing
 
-Contributions welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 ## License
 
-AGPL-3.0
+[AGPL-3.0](LICENSE) - Graeme Knox

@@ -3,14 +3,7 @@
  * Handles downloading, validating, and installing skills to agent directories.
  */
 
-import {
-  existsSync,
-  mkdirSync,
-  cpSync,
-  rmSync,
-  lstatSync,
-  readdirSync,
-} from 'fs';
+import { existsSync, mkdirSync, cpSync, rmSync, lstatSync, readdirSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
 import { randomUUID } from 'crypto';
@@ -21,8 +14,8 @@ import { SKILL_FILENAME } from './github.js';
 // === Types ===
 
 export interface InstallResult {
-  installed: Array<{ skill: string; agent: string; path: string }>;
-  skipped: Array<{ skill: string; agent: string; reason: string }>;
+  installed: { skill: string; agent: string; path: string }[];
+  skipped: { skill: string; agent: string; reason: string }[];
   warnings: string[];
   failed: boolean;
   failureReason?: string;
@@ -107,7 +100,7 @@ export function safeCopyDir(src: string, dest: string): CopyResult {
         } catch (err) {
           // File may have been removed/changed between readdir and copy
           warnings.push(
-            `Could not copy ${entry.name}: ${err instanceof Error ? err.message : 'unknown error'}`
+            `Could not copy ${entry.name}: ${err instanceof Error ? err.message : 'unknown error'}`,
           );
         }
       }
@@ -135,7 +128,7 @@ export async function installSkill(
   skillPath: string,
   skillName: string,
   agents: readonly Agent[],
-  options: InstallOptions
+  options: InstallOptions,
 ): Promise<InstallResult> {
   const result: InstallResult = {
     installed: [],

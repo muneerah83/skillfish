@@ -28,7 +28,7 @@ export interface SkillDiscoveryResult {
 export class RateLimitError extends Error {
   constructor(public resetTime?: Date) {
     super(
-      `GitHub API rate limit exceeded${resetTime ? `. Resets at ${resetTime.toISOString()}` : '. Please try again later.'}`
+      `GitHub API rate limit exceeded${resetTime ? `. Resets at ${resetTime.toISOString()}` : '. Please try again later.'}`,
     );
     this.name = 'RateLimitError';
   }
@@ -40,7 +40,7 @@ export class RateLimitError extends Error {
 export class RepoNotFoundError extends Error {
   constructor(
     public owner: string,
-    public repo: string
+    public repo: string,
   ) {
     super(`Repository not found: ${owner}/${repo}. Check the owner/repo name.`);
     this.name = 'RepoNotFoundError';
@@ -105,9 +105,7 @@ function wrapApiError(err: unknown): never {
   }
 
   // Wrap unknown errors as NetworkError
-  throw new NetworkError(
-    `Network error: ${err instanceof Error ? err.message : 'unknown error'}`
-  );
+  throw new NetworkError(`Network error: ${err instanceof Error ? err.message : 'unknown error'}`);
 }
 
 // === Functions ===
@@ -140,7 +138,7 @@ export async function fetchDefaultBranch(owner: string, repo: string): Promise<s
       throw new GitHubApiError(`GitHub API returned status ${res.status}`);
     }
 
-    const data = await res.json() as { default_branch?: string };
+    const data = (await res.json()) as { default_branch?: string };
     if (typeof data.default_branch !== 'string' || !data.default_branch) {
       throw new GitHubApiError('Repository metadata missing or invalid default_branch field');
     }
@@ -160,7 +158,7 @@ export async function fetchDefaultBranch(owner: string, repo: string): Promise<s
 export async function fetchWithRetry(
   url: string,
   options: RequestInit,
-  maxRetries: number = MAX_RETRIES
+  maxRetries: number = MAX_RETRIES,
 ): Promise<Response> {
   let lastError: Error | null = null;
 
@@ -205,7 +203,7 @@ export async function fetchSkillMdContent(
   owner: string,
   repo: string,
   path: string,
-  branch: string
+  branch: string,
 ): Promise<string | null> {
   const headers = { 'User-Agent': 'skillfish' };
   const url = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
@@ -229,7 +227,10 @@ export async function fetchSkillMdContent(
  * @throws {NetworkError} On network errors (timeout, connection refused)
  * @throws {GitHubApiError} When the API response format is unexpected
  */
-export async function findAllSkillMdFiles(owner: string, repo: string): Promise<SkillDiscoveryResult> {
+export async function findAllSkillMdFiles(
+  owner: string,
+  repo: string,
+): Promise<SkillDiscoveryResult> {
   const headers: Record<string, string> = { 'User-Agent': 'skillfish' };
 
   // Get the default branch
