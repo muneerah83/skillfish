@@ -10,15 +10,120 @@
   <a href="https://github.com/knoxgraeme/skillfish/actions"><img src="https://github.com/knoxgraeme/skillfish/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 </p>
 
-Install AI agent skills from GitHub with a single command.
+<p align="center">
+  <strong>The skill manager for AI coding agents.</strong><br>
+  Install, update, and sync skills across Claude Code, Cursor, Copilot + more.
+</p>
+
+---
+
+## Quick Start
 
 ```bash
 npx skillfish add owner/repo
 ```
 
-## Overview
+One command installs to **all detected agents** on your system.
 
-One command installs skills to **all detected agents**:
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `skillfish add <repo>` | Install skills |
+| `skillfish list` | View installed skills |
+| `skillfish remove [name]` | Remove skills |
+| `skillfish update [name]` | Update installed skills |
+
+## Examples
+
+```bash
+npx skillfish add user/my-skill          # Install a skill
+npx skillfish add owner/repo --all       # Install all skills from repo
+npx skillfish list                       # See what's installed
+npx skillfish update                     # Update all skills
+npx skillfish remove old-skill           # Remove a skill
+```
+
+---
+
+## Supported Agents
+
+Works with [17 agents](#agent-directories) including:
+
+**Claude Code** · **Cursor** · **Windsurf** · **Codex** · **GitHub Copilot** · **Gemini CLI** · **OpenCode** · **Goose** · **Amp** · **Roo Code** · **Kiro CLI** · **Kilo Code** · **Trae** · **Cline** · **Antigravity** · **Droid** · **Clawdbot**
+
+---
+
+## Command Reference
+
+### add
+
+Install skills from a repository.
+
+```bash
+npx skillfish add owner/repo                    # Auto-discover SKILL.md
+npx skillfish add owner/repo/path/to/skill      # Full path syntax
+npx skillfish add owner/repo --path skills/foo  # Explicit path
+npx skillfish add owner/repo --all              # Install all skills
+npx skillfish add owner/repo --force            # Overwrite existing
+npx skillfish add owner/repo --yes              # Skip confirmation
+npx skillfish add owner/repo --json             # JSON output
+```
+
+### list
+
+View installed skills.
+
+```bash
+npx skillfish list                       # Interactive picker
+npx skillfish list --global              # Global skills only (~/)
+npx skillfish list --project             # Project skills only (./)
+npx skillfish list --agent "Claude Code" # Specific agent
+```
+
+### remove
+
+Remove installed skills.
+
+```bash
+npx skillfish remove                          # Interactive picker
+npx skillfish remove my-skill                 # By name
+npx skillfish remove --all                    # Remove all
+npx skillfish remove my-skill --project       # Project only
+npx skillfish remove my-skill --global        # Global only
+npx skillfish remove my-skill --agent "Cursor" # Specific agent
+npx skillfish remove my-skill --yes           # Skip confirmation
+```
+
+### update
+
+Update installed skills to latest version.
+
+```bash
+npx skillfish update                     # Update all skills
+npx skillfish update my-skill            # Update specific skill
+npx skillfish update --yes               # Skip confirmation
+```
+
+---
+
+## Interactive Selection
+
+When a repo contains multiple skills, you'll get an interactive picker:
+
+```
+◆  Select skills to install
+│  ◻ my-skill - A helpful skill for your AI agent
+│  ◻ another-skill - Another useful capability
+│  ◻ third-skill - Yet another skill option
+└
+```
+
+Use `--all` to install all skills non-interactively.
+
+---
+
+## Agent Directories
 
 | Agent | Skills Directory |
 |-------|------------------|
@@ -40,117 +145,18 @@ One command installs skills to **all detected agents**:
 | Droid | `~/.factory/skills/` |
 | Clawdbot | `~/.clawdbot/skills/` |
 
-## Usage
+---
 
-### Install Skills
+## Skill Discovery
 
-```bash
-# Install a skill (auto-discovers SKILL.md location)
-npx skillfish add owner/repo
+The CLI auto-discovers `SKILL.md` in these locations:
 
-# Full path from GitHub (plugin/skill syntax)
-npx skillfish add owner/repo/plugin/skill
-
-# Specify explicit path
-npx skillfish add owner/repo --path path/to/skill
-
-# Install all skills from a repo (non-interactive)
-npx skillfish add owner/repo --all
-
-# Overwrite existing skills
-npx skillfish add owner/repo --force
-
-# Skip confirmation prompt
-npx skillfish add owner/repo --yes
-```
-
-### List Skills
-
-```bash
-# Interactive agent and location picker
-npx skillfish list
-
-# List global skills only
-npx skillfish list --global
-
-# List project skills only
-npx skillfish list --project
-
-# List skills for a specific agent
-npx skillfish list --agent "Claude Code"
-```
-
-### Remove Skills
-
-```bash
-# Interactive skill picker
-npx skillfish remove
-
-# Remove a skill by name
-npx skillfish remove my-skill
-
-# Remove all installed skills
-npx skillfish remove --all
-
-# Remove from current project only
-npx skillfish remove my-skill --project
-
-# Remove from home directory only
-npx skillfish remove my-skill --global
-
-# Remove from specific agent
-npx skillfish remove my-skill --agent "Claude Code"
-
-# Skip confirmation prompt
-npx skillfish remove my-skill --yes
-```
-
-## Interactive Selection
-
-When a repo contains multiple skills, you'll get an interactive multi-select menu with skill names and descriptions from frontmatter:
-
-```
-◆  Select skills to install
-│  ◻ my-skill - A helpful skill for your AI agent
-│  ◻ another-skill - Another useful capability
-│  ◻ third-skill - Yet another skill option
-│  ...
-└
-```
-
-Use `--all` to install all skills non-interactively (useful for automation).
-
-## Examples
-
-```bash
-# Install from a skill repo with SKILL.md at root
-npx skillfish add user/my-skill
-
-# Install using full path from GitHub
-npx skillfish add owner/repo/path/to/skill
-
-# Install from a plugin repo with explicit path
-npx skillfish add org/plugin-repo --path plugins/my-plugin/skills/skill-name
-
-# Install all skills non-interactively
-npx skillfish add org/plugin-repo --all --yes
-
-# Force reinstall
-npx skillfish add user/skill --force
-
-# JSON output for automation
-npx skillfish add owner/repo --json
-```
-
-## Discovery
-
-The CLI searches these locations for `SKILL.md`:
 1. Repository root
 2. `.claude/skills/{repo}/`
 3. `skills/{repo}/`
 4. `plugins/{repo}/skills/{repo}/`
 
-Use `--path` to skip discovery and specify the exact location.
+Use `--path` to specify an exact location.
 
 ## Telemetry
 
