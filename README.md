@@ -1,10 +1,14 @@
-# skillfish
+<p align="center">
+  <img src="assets/logo.png" alt="skillfish" width="600">
+</p>
 
-[![npm](https://img.shields.io/npm/v/skillfish)](https://npmjs.com/package/skillfish)
-[![downloads](https://img.shields.io/npm/dm/skillfish)](https://npmjs.com/package/skillfish)
-[![license](https://img.shields.io/npm/l/skillfish)](LICENSE)
-[![node](https://img.shields.io/node/v/skillfish)](package.json)
-[![CI](https://github.com/knoxgraeme/skillfish/actions/workflows/ci.yml/badge.svg)](https://github.com/knoxgraeme/skillfish/actions)
+<p align="center">
+  <a href="https://npmjs.com/package/skillfish"><img src="https://img.shields.io/npm/v/skillfish" alt="npm"></a>
+  <a href="https://npmjs.com/package/skillfish"><img src="https://img.shields.io/npm/dm/skillfish" alt="downloads"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/npm/l/skillfish" alt="license"></a>
+  <a href="package.json"><img src="https://img.shields.io/node/v/skillfish" alt="node"></a>
+  <a href="https://github.com/knoxgraeme/skillfish/actions"><img src="https://github.com/knoxgraeme/skillfish/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+</p>
 
 Install AI agent skills from GitHub with a single command.
 
