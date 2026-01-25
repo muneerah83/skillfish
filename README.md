@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.png" alt="skillfish" width="600">
+  <img src="https://raw.githubusercontent.com/knoxgraeme/skillfish/main/assets/logo.png" alt="skillfish" width="600">
 </p>
 
 <p align="center">
