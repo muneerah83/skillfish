@@ -64,7 +64,7 @@ Works with 17+ agents including:
 **Claude Code** · **Cursor** · **Windsurf** · **Codex** · **GitHub Copilot** · **Gemini CLI** · **OpenCode** · **Goose** · **Amp** · **Roo Code** · **Kiro CLI** · **Kilo Code** · **Trae** · **Cline** · **Antigravity** · **Droid** · **Clawdbot**
 
 <details>
-<summary>Agent skill directories</summary>
+<summary>All supported agents</summary>
 
 | Agent | Skills Directory |
 |-------|------------------|
@@ -140,23 +140,6 @@ npx skillfish update                     # Update all skills
 npx skillfish update my-skill            # Update specific skill
 npx skillfish update --yes               # Skip confirmation
 ```
-
-<details>
-<summary>Interactive Selection</summary>
-
-When a repo contains multiple skills, you'll get an interactive picker:
-
-```
-◆  Select skills to install
-│  ◻ my-skill - A helpful skill for your AI agent
-│  ◻ another-skill - Another useful capability
-│  ◻ third-skill - Yet another skill option
-└
-```
-
-Use `--all` to install all skills non-interactively.
-
-</details>
 
 <details>
 <summary>Exit Codes</summary>
