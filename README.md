@@ -158,27 +158,20 @@ The CLI auto-discovers `SKILL.md` in these locations:
 
 Use `--path` to specify an exact location.
 
-## Telemetry
+---
 
-This CLI collects anonymous, aggregate install counts to understand skill popularity. No personally identifiable information is collected.
+## What Are Agent Skills?
 
-**What is collected:**
-- Skill identifier (e.g., `owner/repo/skill-name`)
-- Incremented install count
+Agent Skills are portable packages of instructions, prompts, scripts, and resources that AI coding agents can discover and use. They give agents like Claude Code, Cursor, and Copilot domain expertise, reusable workflows, and team-specific context - loaded on demand to extend capabilities.
 
-**What is NOT collected:**
-- IP addresses
-- User identifiers
-- System information
-- Usage patterns
+Each skill contains a `SKILL.md` file with structured prompts and instructions the agent can follow.
 
-To opt out, set `DO_NOT_TRACK=1` in your environment:
+Learn more at [agentskills.io](https://agentskills.io).
 
-```bash
-DO_NOT_TRACK=1 npx skillfish add owner/repo
-```
+## Find Skills
 
-Telemetry is also automatically disabled in CI environments (`CI=true`).
+- **[skill.fish](https://skill.fish)** - Browse and discover community skills
+- **[MCP Market](https://mcpmarket.com/tools/skills)** - Skills directory
 
 ## Exit Codes
 
@@ -214,6 +207,23 @@ Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for release history.
+
+<details>
+<summary>Telemetry</summary>
+
+This CLI collects anonymous, aggregate install counts to understand skill popularity. No personally identifiable information is collected.
+
+**What is collected:** Skill identifier (e.g., `owner/repo/skill-name`) and incremented install count.
+
+**What is NOT collected:** IP addresses, user identifiers, system information, or usage patterns.
+
+To opt out, set `DO_NOT_TRACK=1` or run in CI (`CI=true`):
+
+```bash
+DO_NOT_TRACK=1 npx skillfish add owner/repo
+```
+
+</details>
 
 ## License
 
