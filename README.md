@@ -45,7 +45,9 @@ Learn more at [agentskills.io](https://agentskills.io).
 | `skillfish add <owner/repo>` | Install skills |
 | `skillfish list` | View installed skills |
 | `skillfish remove [name]` | Remove skills |
-| `skillfish update [name]` | Update installed skills |
+| `skillfish update` | Update installed skills |
+
+All commands support `--json` for automation.
 
 ## Examples
 
@@ -98,12 +100,14 @@ Install skills from a repository.
 
 ```bash
 npx skillfish add owner/repo                    # Auto-discover SKILL.md
+npx skillfish add owner/repo my-skill           # Install by skill name
 npx skillfish add owner/repo/path/to/skill      # Full path syntax
 npx skillfish add owner/repo --path skills/foo  # Explicit path
 npx skillfish add owner/repo --all              # Install all skills
 npx skillfish add owner/repo --force            # Overwrite existing
 npx skillfish add owner/repo --yes              # Skip confirmation
-npx skillfish add owner/repo --json             # JSON output
+npx skillfish add owner/repo --project          # Project only (./)
+npx skillfish add owner/repo --global           # Global only (~/)
 ```
 
 ### list
@@ -111,7 +115,7 @@ npx skillfish add owner/repo --json             # JSON output
 View installed skills.
 
 ```bash
-npx skillfish list                       # Interactive picker
+npx skillfish list                       # List all installed skills
 npx skillfish list --global              # Global skills only (~/)
 npx skillfish list --project             # Project skills only (./)
 npx skillfish list --agent "Claude Code" # Specific agent
@@ -136,9 +140,9 @@ npx skillfish remove my-skill --yes           # Skip confirmation
 Update installed skills to latest version.
 
 ```bash
-npx skillfish update                     # Update all skills
-npx skillfish update my-skill            # Update specific skill
-npx skillfish update --yes               # Skip confirmation
+npx skillfish update                     # Check for updates interactively
+npx skillfish update --yes               # Update all without prompting
+npx skillfish update --json              # Check for updates (JSON output)
 ```
 
 <details>
