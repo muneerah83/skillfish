@@ -25,11 +25,26 @@ npx skillfish add owner/repo
 
 One command installs to **all detected agents** on your system.
 
+## What Are Agent Skills?
+
+Agent Skills are portable packages of instructions, prompts, scripts, and resources that AI coding agents can discover and use. They give agents like Claude Code, Cursor, and Copilot domain expertise, reusable workflows, and team-specific context - loaded on demand to extend capabilities.
+
+Each skill contains a `SKILL.md` file with structured prompts and instructions the agent can follow.
+
+Learn more at [agentskills.io](https://agentskills.io).
+
+## Find Skills
+
+- **[skill.fish](https://skill.fish)** - Browse and discover community skills
+- **[MCP Market](https://mcpmarket.com/tools/skills)** - Skills directory
+
+---
+
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `skillfish add <repo>` | Install skills |
+| `skillfish add <owner/repo>` | Install skills |
 | `skillfish list` | View installed skills |
 | `skillfish remove [name]` | Remove skills |
 | `skillfish update [name]` | Update installed skills |
@@ -48,9 +63,34 @@ npx skillfish remove old-skill           # Remove a skill
 
 ## Supported Agents
 
-Works with [17 agents](#agent-directories) including:
+Works with 17+ agents including:
 
 **Claude Code** · **Cursor** · **Windsurf** · **Codex** · **GitHub Copilot** · **Gemini CLI** · **OpenCode** · **Goose** · **Amp** · **Roo Code** · **Kiro CLI** · **Kilo Code** · **Trae** · **Cline** · **Antigravity** · **Droid** · **Clawdbot**
+
+<details>
+<summary>Agent skill directories</summary>
+
+| Agent | Skills Directory |
+|-------|------------------|
+| Claude Code | `~/.claude/skills/` |
+| Cursor | `~/.cursor/skills/` |
+| Windsurf | `~/.codeium/windsurf/skills/` |
+| Codex | `~/.codex/skills/` |
+| GitHub Copilot | `~/.github/skills/` |
+| Gemini CLI | `~/.gemini/skills/` |
+| OpenCode | `~/.opencode/skills/` |
+| Goose | `~/.goose/skills/` |
+| Amp | `~/.agents/skills/` |
+| Roo Code | `~/.roo/skills/` |
+| Kiro CLI | `~/.kiro/skills/` |
+| Kilo Code | `~/.kilocode/skills/` |
+| Trae | `~/.trae/skills/` |
+| Cline | `~/.cline/skills/` |
+| Antigravity | `~/.gemini/antigravity/skills/` |
+| Droid | `~/.factory/skills/` |
+| Clawdbot | `~/.clawdbot/skills/` |
+
+</details>
 
 ---
 
@@ -107,7 +147,8 @@ npx skillfish update --yes               # Skip confirmation
 
 ---
 
-## Interactive Selection
+<details>
+<summary>Interactive Selection</summary>
 
 When a repo contains multiple skills, you'll get an interactive picker:
 
@@ -121,59 +162,10 @@ When a repo contains multiple skills, you'll get an interactive picker:
 
 Use `--all` to install all skills non-interactively.
 
----
+</details>
 
-## Agent Directories
-
-| Agent | Skills Directory |
-|-------|------------------|
-| Claude Code | `~/.claude/skills/` |
-| Cursor | `~/.cursor/skills/` |
-| Windsurf | `~/.codeium/windsurf/skills/` |
-| Codex | `~/.codex/skills/` |
-| GitHub Copilot | `~/.github/skills/` |
-| Gemini CLI | `~/.gemini/skills/` |
-| OpenCode | `~/.opencode/skills/` |
-| Goose | `~/.goose/skills/` |
-| Amp | `~/.agents/skills/` |
-| Roo Code | `~/.roo/skills/` |
-| Kiro CLI | `~/.kiro/skills/` |
-| Kilo Code | `~/.kilocode/skills/` |
-| Trae | `~/.trae/skills/` |
-| Cline | `~/.cline/skills/` |
-| Antigravity | `~/.gemini/antigravity/skills/` |
-| Droid | `~/.factory/skills/` |
-| Clawdbot | `~/.clawdbot/skills/` |
-
----
-
-## Skill Discovery
-
-The CLI auto-discovers `SKILL.md` in these locations:
-
-1. Repository root
-2. `.claude/skills/{repo}/`
-3. `skills/{repo}/`
-4. `plugins/{repo}/skills/{repo}/`
-
-Use `--path` to specify an exact location.
-
----
-
-## What Are Agent Skills?
-
-Agent Skills are portable packages of instructions, prompts, scripts, and resources that AI coding agents can discover and use. They give agents like Claude Code, Cursor, and Copilot domain expertise, reusable workflows, and team-specific context - loaded on demand to extend capabilities.
-
-Each skill contains a `SKILL.md` file with structured prompts and instructions the agent can follow.
-
-Learn more at [agentskills.io](https://agentskills.io).
-
-## Find Skills
-
-- **[skill.fish](https://skill.fish)** - Browse and discover community skills
-- **[MCP Market](https://mcpmarket.com/tools/skills)** - Skills directory
-
-## Exit Codes
+<details>
+<summary>Exit Codes</summary>
 
 Exit codes help agents and scripts understand command results without parsing error messages.
 
@@ -191,6 +183,10 @@ JSON output includes `exit_code` for programmatic access:
 skillfish add owner/repo --json
 # Output includes: "exit_code": 0 (or error code)
 ```
+
+</details>
+
+---
 
 ## Security
 
