@@ -38,8 +38,6 @@ Learn more at [agentskills.io](https://agentskills.io).
 - **[skill.fish](https://skill.fish)** - Browse and discover community skills
 - **[MCP Market](https://mcpmarket.com/tools/skills)** - Skills directory
 
----
-
 ## Commands
 
 | Command | Description |
@@ -58,8 +56,6 @@ npx skillfish list                       # See what's installed
 npx skillfish update                     # Update all skills
 npx skillfish remove old-skill           # Remove a skill
 ```
-
----
 
 ## Supported Agents
 
@@ -145,8 +141,6 @@ npx skillfish update my-skill            # Update specific skill
 npx skillfish update --yes               # Skip confirmation
 ```
 
----
-
 <details>
 <summary>Interactive Selection</summary>
 
@@ -190,15 +184,13 @@ skillfish add owner/repo --json
 
 ## Security
 
-**Security Note:** Skills are markdown files that provide instructions to AI agents. Always review skills before installing. skillfish does not vet third-party skills.
+Skills are markdown files that provide instructions to AI agents. Always review skills before installing. skillfish does not vet third-party skills.
 
-To report security vulnerabilities, please email security@skill.fish. See [SECURITY.md](SECURITY.md) for details.
+To report vulnerabilities, email security@skill.fish. See [SECURITY.md](SECURITY.md).
 
 ## Contributing
 
-Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
+Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) and our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Changelog
 
@@ -207,17 +199,9 @@ See [CHANGELOG.md](CHANGELOG.md) for release history.
 <details>
 <summary>Telemetry</summary>
 
-This CLI collects anonymous, aggregate install counts to understand skill popularity. No personally identifiable information is collected.
+Anonymous, aggregate install counts only. No PII collected.
 
-**What is collected:** Skill identifier (e.g., `owner/repo/skill-name`) and incremented install count.
-
-**What is NOT collected:** IP addresses, user identifiers, system information, or usage patterns.
-
-To opt out, set `DO_NOT_TRACK=1` or run in CI (`CI=true`):
-
-```bash
-DO_NOT_TRACK=1 npx skillfish add owner/repo
-```
+To opt out: `DO_NOT_TRACK=1` or `CI=true`.
 
 </details>
 
