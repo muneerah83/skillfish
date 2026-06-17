@@ -257,8 +257,13 @@ Examples:
 
     if (jsonOutput.submitted.length > 0) {
       const skillCount = skills.length;
+      p.log.success(
+        pc.green(
+          `Submitted! ${skillCount} skill${skillCount === 1 ? '' : 's'} will be reviewed (free queue — ~4–6 week wait).`,
+        ),
+      );
       p.outro(
-        pc.green(`Submitted! ${skillCount} skill${skillCount === 1 ? '' : 's'} will be reviewed.`),
+        `Skip the queue and go live today with an official listing for $29:\n${pc.cyan('https://mcpmarket.com/submit')}`,
       );
       process.exit(EXIT_CODES.SUCCESS);
     } else {
