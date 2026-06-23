@@ -42,6 +42,7 @@ import {
 } from '../lib/github.js';
 import type { GitTreeItem } from '../utils.js';
 import { installSkill } from '../lib/installer.js';
+import { fetchWithRetry } from '../lib/http.js';
 import { EXIT_CODES, isValidName, type ExitCode } from '../lib/constants.js';
 
 // === Types ===
@@ -63,12 +64,14 @@ interface ParsedProviderUrl {
   subPath?: string;
 }
 
-/** Maps known public Git hosting hostnames to their giget provider prefix. */
+/**
+ * Maps known public Git hosting hostnames to their giget provider prefix.
+ * Only includes providers with built-in giget support (github, gh, gitlab, bitbucket, sourcehut).
+ */
 const URL_PROVIDERS: Record<string, string> = {
   'github.com': 'github',
   'gitlab.com': 'gitlab',
   'bitbucket.org': 'bitbucket',
-  'codeberg.org': 'gitea',
 };
 
 /**
@@ -112,7 +115,7 @@ export const addCommand = new Command('add')
   .description('Install a skill from a Git repository')
   .argument(
     '<repo>',
-    'Repository as owner/repo, owner/repo/path, or full URL (github.com, gitlab.com, bitbucket.org, codeberg.org)',
+    'Repository as owner/repo, owner/repo/path, or full URL (github.com, gitlab.com, bitbucket.org)',
   )
   .argument('[skill-name]', 'Install a specific skill by name (from SKILL.md frontmatter)')
   .option('--force', 'Overwrite existing skills without prompting')
@@ -133,8 +136,7 @@ Examples:
   $ skillfish add owner/repo --path path/to          Install skill at specific path
   $ skillfish add owner/repo --project               Install to current project only
   $ skillfish add https://gitlab.com/owner/repo      Install from GitLab
-  $ skillfish add https://bitbucket.org/owner/repo   Install from Bitbucket
-  $ skillfish add https://codeberg.org/owner/repo    Install from Codeberg`,
+  $ skillfish add https://bitbucket.org/owner/repo   Install from Bitbucket`,
   )
   .action(
     async (
@@ -223,7 +225,7 @@ Examples:
         const parsed = parseProviderUrl(repoArg);
         if (!parsed) {
           exitWithError(
-            'Unsupported URL. Supported hosts: github.com, gitlab.com, bitbucket.org, codeberg.org',
+            'Unsupported URL. Supported hosts: github.com, gitlab.com, bitbucket.org',
             EXIT_CODES.INVALID_ARGS,
           );
         }
@@ -294,12 +296,15 @@ Examples:
         // For non-GitHub providers, the GitHub tree API is unavailable.
         // Install from the explicit path, or fall back to the root SKILL.md.
         const skillPath = explicitPath ?? SKILL_FILENAME;
-        discoveryResult = { paths: [skillPath], branch: undefined, sha: undefined, tree: [] };
         if (!explicitPath && !jsonMode) {
           p.log.info(
             `Skill discovery is not available for ${repoHost}. Installing root skill. Use --path to target a specific skill.`,
           );
         }
+        // Fetch the actual default branch so repos whose default is not 'main' don't 404.
+        // giget defaults to 'main' when no ref is given, which breaks e.g. 'master' repos.
+        const defaultBranch = await fetchProviderDefaultBranch(provider, owner, repo);
+        discoveryResult = { paths: [skillPath], branch: defaultBranch, sha: undefined, tree: [] };
       } else if (explicitPath) {
         // For explicit paths on GitHub, we still need to fetch the default branch and SHA for tracking
         try {
@@ -865,4 +870,39 @@ async function confirmInstallBatch(
   }
 
   return proceed;
+}
+
+/**
+ * Fetch the default branch for a non-GitHub provider.
+ * giget defaults to 'main' when no ref is given, which breaks public repos
+ * whose default branch is 'master' or another name.
+ *
+ * Returns undefined on any failure; giget will then fall back to 'main'.
+ */
+async function fetchProviderDefaultBranch(
+  provider: string,
+  owner: string,
+  repo: string,
+): Promise<string | undefined> {
+  const headers = { 'User-Agent': 'skillfish' };
+  try {
+    if (provider === 'gitlab') {
+      const projectPath = encodeURIComponent(`${owner}/${repo}`);
+      const url = `https://gitlab.com/api/v4/projects/${projectPath}`;
+      const res = await fetchWithRetry(url, { headers }, 2);
+      if (!res.ok) return undefined;
+      const data = (await res.json()) as { default_branch?: string };
+      return typeof data.default_branch === 'string' ? data.default_branch : undefined;
+    }
+    if (provider === 'bitbucket') {
+      const url = `https://api.bitbucket.org/2.0/repositories/${owner}/${repo}`;
+      const res = await fetchWithRetry(url, { headers }, 2);
+      if (!res.ok) return undefined;
+      const data = (await res.json()) as { mainbranch?: { name?: string } };
+      return typeof data.mainbranch?.name === 'string' ? data.mainbranch.name : undefined;
+    }
+  } catch {
+    // Network failure or timeout - let giget use its default
+  }
+  return undefined;
 }

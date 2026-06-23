@@ -124,20 +124,11 @@ describe('add command', () => {
       expect(hasFormatError).not.toBe(true);
     }, 30_000);
 
-    it('accepts a Codeberg URL', () => {
-      const { stdout } = invokeCli([
-        '--json',
-        'add',
-        'https://codeberg.org/owner/repo',
-        '--yes',
-        '--global',
-      ]);
-      const json = JSON.parse(stdout);
-      const hasFormatError = json.errors?.some(
-        (e: string) => e.includes('Invalid format') || e.includes('Unsupported URL'),
-      );
-      expect(hasFormatError).not.toBe(true);
-    }, 30_000);
+    it('rejects a Codeberg URL (no giget built-in support)', () => {
+      const { exitCode, stderr } = invokeCli(['add', 'https://codeberg.org/owner/repo']);
+      expect(exitCode).toBe(2);
+      expect(stderr).toContain('Unsupported URL');
+    });
 
     it('rejects an unknown host URL', () => {
       const { exitCode, stderr } = invokeCli([
